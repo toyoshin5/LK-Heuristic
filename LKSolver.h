@@ -13,7 +13,7 @@ class LKSolver {
     double getCurrentTourDistance();
     void optimizeTour();
     void printTour();
-    void printTourIds();
+    void printTourIds(bool showCoords=false);
 
 
   private:

@@ -195,7 +195,7 @@ void LKSolver::LKMove(int tourStart) {
   long distanceAfter = getCurrentTourDistance();
   assert(distanceAfter <= initialTourDistance);
 
-  printTour();
+  // printTour();
   assert(isTour());
 
 }
@@ -253,16 +253,20 @@ bool LKSolver::isTour() {
 void LKSolver::printTour() {
   int current = 0;
   do {
-    //cout << current << " ; ";
+    cout << current << " ; ";
     current = tour[current];
   } while (current != 0);
-  //cout << endl;
+  cout << endl;
 }
 
-void LKSolver::printTourIds() {
+void LKSolver::printTourIds(bool showCoords) {
   int current = 0;
   do {
-    cout << ids[current] << endl;
+    cout << ids[current];
+    if (showCoords) {
+      cout << " " << coords[current].first << " " << coords[current].second;
+    }
+    cout << endl;
     current = tour[current];
   } while (current != 0);
 }
@@ -284,7 +288,6 @@ int main(){
   LKSolver mat(coord, id);
 
   mat.optimizeTour();
-
-  //cout << mat.getCurrentTourDistance() << endl;
-  mat.printTourIds();
+  cout << mat.getCurrentTourDistance() << endl;
+  mat.printTourIds(true);
 }
