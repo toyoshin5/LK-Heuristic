@@ -1,4 +1,4 @@
-#include "LKMatrix.h"
+#include "LKSolver.h"
 #include <vector>
 #include <cmath>
 #include <set>
@@ -20,28 +20,27 @@ pair<int, int> make_sorted_pair(int x, int y) {
   }
 }
 
-
-LKMatrix::LKMatrix(vector<pair<double, double> > &coords, vector<int> &ids) {
+LKSolver::LKSolver(vector<pair<double, double> > &coords, vector<int> &ids) {
   this->coords = coords;
   this->ids = ids;
   size = ids.size();
 
-  // initialize tour
+  // 経路を初期化
   tour = vector<int>(size, 0);
 
-  // initial 'random' tour
+  // ランダムな経路で初期化
   for (int i = 0; i < size; i++) {
     tour[i] = (i + 1) % size;
   }
 
-  // sets the distanceVector
+  // 各都市間の距離を計算しておく
   edgeDistances = vector<vector<double> > (size, vector<double> (size, 0));
 
   double edgeDistance;
   for (int i = 0; i < size; i++) {
     for (int j = 0; j < size; j++) {
 
-      // Compute the edge distance
+      // 距離を計算
       edgeDistance = sqrt(pow((coords[i].first - coords[j].first), 2) + 
           pow((coords[i].second - coords[j].second), 2));
       edgeDistances[i][j] = edgeDistance;
@@ -50,7 +49,8 @@ LKMatrix::LKMatrix(vector<pair<double, double> > &coords, vector<int> &ids) {
   }
 }
 
-double LKMatrix::getCurrentTourDistance() {
+// 経路の距離を計算
+double LKSolver::getCurrentTourDistance() {
   int currentIndex = 0;
   double distance = 0;
   for (int i = 0; i < size; i++) {
@@ -62,7 +62,8 @@ double LKMatrix::getCurrentTourDistance() {
   return distance;
 }
 
-void LKMatrix::LKMove(int tourStart) {
+
+void LKSolver::LKMove(int tourStart) {
   set<pair<int,int> > broken_set, joined_set;
   vector<int> tour_opt = tour;
   double g_opt = 0;
@@ -128,7 +129,7 @@ void LKMatrix::LKMove(int tourStart) {
       nextV = possibleNextV;
       //cout << "Moving to " << nextV << endl;
     }
-
+    
     // a next y_i exists
     if (nextV != -1) {
 
@@ -199,7 +200,7 @@ void LKMatrix::LKMove(int tourStart) {
 
 }
 
-void LKMatrix::optimizeTour() {
+void LKSolver::optimizeTour() {
   // we need to test for convergence and also the difference from last time
   int diff;
   int old_distance = 0;
@@ -222,29 +223,23 @@ void LKMatrix::optimizeTour() {
   }
 }
 
-/*
- * Reverse the tour between indices start and end
- */
-void LKMatrix::reverse(int start, int end) {
+// 経路の指定区間の反転
+void LKSolver::reverse(int start, int end) {
   int current = start;
   int next = tour[start];
   int nextNext;
   do {
     //cout << "reversing" << endl;
-    // look ahead to where we need to go after this iteration
+    // この反復後にどこに行く必要があるかを先読みする
     nextNext = tour[next];
-
-    // reverse the direction at this point
     tour[next] = current;
-
-    // move to the next pointer
     current = next;
     next = nextNext;
-  } while (current != end); // terminate once we've reversed up to end
+  } while (current != end); // 終了条件は、最後に反転した都市が終了都市になるまで
 }
 
-// Sanity check function
-bool LKMatrix::isTour() {
+// 巡回しているかどうかを確認
+bool LKSolver::isTour() {
   int count = 1;
   int start = tour[0];
   while (start != 0) {
@@ -255,7 +250,7 @@ bool LKMatrix::isTour() {
 }
 
 
-void LKMatrix::printTour() {
+void LKSolver::printTour() {
   int current = 0;
   do {
     //cout << current << " ; ";
@@ -264,10 +259,32 @@ void LKMatrix::printTour() {
   //cout << endl;
 }
 
-void LKMatrix::printTourIds() {
+void LKSolver::printTourIds() {
   int current = 0;
   do {
     cout << ids[current] << endl;
     current = tour[current];
   } while (current != 0);
+}
+
+// Main
+
+vector<int> id;
+vector<pair<double,double> > coord;
+
+int main(){
+  int n;
+  double x, y;
+  while(cin >> n){
+    id.push_back(n);
+    cin >> x >> y;
+    coord.push_back(make_pair(x, y));
+  }
+
+  LKSolver mat(coord, id);
+
+  mat.optimizeTour();
+
+  //cout << mat.getCurrentTourDistance() << endl;
+  mat.printTourIds();
 }

@@ -5,10 +5,10 @@
 
 using namespace std;
 
-class LKMatrix {
+class LKSolver {
   public:
     int size;
-    LKMatrix(vector<pair<double, double> > &coords, vector<int> &ids);
+    LKSolver(vector<pair<double, double> > &coords, vector<int> &ids);
     vector<int> getCurrentTour();
     double getCurrentTourDistance();
     void optimizeTour();

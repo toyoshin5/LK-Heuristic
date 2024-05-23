@@ -13,17 +13,13 @@ Team: Codebreakers
 ## Step 1
 Compile Code
 ```
-g++ LKMain.cpp LKMatrix.cpp -o LKSolver
+g++ LKMain.cpp
 ```
 
 ## Step 2
 Run Code
 ```
-./exec.sh <input_file> out.tsp
+./a.out < eil51.tsp > out.tsp
 ```
 
-## With Timing
-```
-./run_program ./exec.sh <input_file> out.tsp
-```
 
