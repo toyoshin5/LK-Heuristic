@@ -1,25 +1,15 @@
 LK-Heuristic TSP
 =============
-
-Implements the Lin-Kernighan Heuristic for solving the Travelling Salesman Problem
-
-Problem 1 of Heuristic Problem Solving at NYU
-
-Team: Codebreakers
-- Abhinav Tamaskar (avt237@nyu.edu)
-- Lingliang Zhang (lz781@nyu.edu)
-
-
+# 動作確認
 ## Step 1
-Compile Code
+コンパイルします
 ```
-g++ LKMain.cpp
+g++ LK.cpp
 ```
 
 ## Step 2
-Run Code
+実行します
 ```
-./a.out < eil51.tsp > out.tsp
+./a.out < eil51.tsp > out51.tsp
+./a.out < eil101.tsp > out101.tsp
 ```
-
-
