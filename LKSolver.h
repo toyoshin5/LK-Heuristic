@@ -12,6 +12,7 @@ class LKSolver {
     vector<int> getCurrentTour();
     double getCurrentTourDistance();
     void optimizeTour();
+    vector<pair<double, double> > getTour();
     void printTour();
     void printTourIds(bool showCoords=false);
 
