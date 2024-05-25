@@ -6,12 +6,12 @@ LK-Heuristic TSP
 ## Step 1
 コンパイルします
 ```
-g++ LK.cpp
+g++ -std=c++11 LK.cpp
 ```
 
 ## Step 2
 実行します
 ```
-./a.out < eil51.tsp > out51.tsp
-./a.out < eil101.tsp > out101.tsp
+./a.out < eil51.tsp >| out51.txt
+./a.out < eil101.tsp >| out101.txt
 ```

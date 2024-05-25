@@ -20,19 +20,30 @@ pair<int, int> make_sorted_pair(int x, int y) {
   }
 }
 
-LKSolver::LKSolver(vector<pair<double, double> > &coords, vector<int> &ids) {
-  this->coords = coords;
-  this->ids = ids;
+LKSolver::LKSolver(vector<pair<double, double> > &cds, vector<int> &idss) {
+  this->coords = cds;
+  this->ids = idss;
   size = ids.size();
 
   // 経路を初期化
   tour = vector<int>(size, 0);
 
-  // ランダムな経路で初期化
+  // ランダムな経路で初期化 
   for (int i = 0; i < size; i++) {
     tour[i] = (i + 1) % size;
   }
 
+  // coordsをランダムにシャッフル
+  srand(time(NULL));
+  for (int i = 0; i < size; i++) {
+    int j = rand() % size;
+    pair<double, double> temp = coords[i];
+    coords[i] = coords[j];
+    coords[j] = temp;
+    int tempId = ids[i];
+    ids[i] = ids[j];
+    ids[j] = tempId;
+  }
   // 各都市間の距離を計算しておく
   edgeDistances = vector<vector<double> > (size, vector<double> (size, 0));
 
@@ -47,29 +58,6 @@ LKSolver::LKSolver(vector<pair<double, double> > &coords, vector<int> &ids) {
       edgeDistances[j][i] = edgeDistance;
     }
   }
-
-  // //最近傍探索法で初期解を生成
-  // set<int> unvisited;
-  // for (int i = 1; i < size; i++) {
-  //   unvisited.insert(i);
-  // }
-  // int current = 0;
-  // int next;
-  // double minDistance;
-  // int minIndex;
-  // while (!unvisited.empty()) {
-  //   minDistance = 1000000000;
-  //   for (set<int>::iterator it = unvisited.begin(); it != unvisited.end(); it++) {
-  //     if (edgeDistances[current][*it] < minDistance) {
-  //       minDistance = edgeDistances[current][*it];
-  //       minIndex = *it;
-  //     }
-  //   }
-  //   unvisited.erase(minIndex);
-  //   tour[current] = minIndex;
-  //   current = minIndex;
-  // }
-  // tour[current] = 0;
 
 }
 
@@ -115,6 +103,7 @@ void LKSolver::LKMove(int tourStart) {
     if (joined_set.count(broken_edge) > 0) break;
 
     // 現在の都市からつながっている都市を順番に見ていく
+
     for (int possibleNextV = tour[fromV]; nextV == -1 && possibleNextV != tourStart; possibleNextV = tour[possibleNextV]) {
       //繋ぎ変えた結果得られる利得を計算(大きいほどよい)
       g_local = broken_edge_length - edgeDistances[fromV][possibleNextV];
