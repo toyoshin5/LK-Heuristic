@@ -1,5 +1,10 @@
 {
     "files.associations": {
-        "iostream": "cpp"
+        "*.py ": "python",
+        "*.m": "matlab",
+        "iostream": "cpp",
+        "set": "cpp",
+        "vector": "cpp",
+        "ostream": "cpp"
     }
 }

@@ -47,6 +47,30 @@ LKSolver::LKSolver(vector<pair<double, double> > &coords, vector<int> &ids) {
       edgeDistances[j][i] = edgeDistance;
     }
   }
+
+  // //最近傍探索法で初期解を生成
+  // set<int> unvisited;
+  // for (int i = 1; i < size; i++) {
+  //   unvisited.insert(i);
+  // }
+  // int current = 0;
+  // int next;
+  // double minDistance;
+  // int minIndex;
+  // while (!unvisited.empty()) {
+  //   minDistance = 1000000000;
+  //   for (set<int>::iterator it = unvisited.begin(); it != unvisited.end(); it++) {
+  //     if (edgeDistances[current][*it] < minDistance) {
+  //       minDistance = edgeDistances[current][*it];
+  //       minIndex = *it;
+  //     }
+  //   }
+  //   unvisited.erase(minIndex);
+  //   tour[current] = minIndex;
+  //   current = minIndex;
+  // }
+  // tour[current] = 0;
+
 }
 
 // 経路の総距離を取得
@@ -61,89 +85,73 @@ double LKSolver::getCurrentTourDistance() {
   return distance;
 }
 
-
 void LKSolver::LKMove(int tourStart) {
-  set<pair<int,int> > broken_set, joined_set;
-  vector<int> tour_opt = tour;
-  double g_opt = 0;
-  double g = 0; // := G_i
-  double g_local; // := g_i
-  int lastNextV = tourStart;
-  int fromV;
-  int nextV;
+  // 変数の初期化
+  set<pair<int,int> > broken_set, joined_set; // 壊されたエッジと結合されたエッジのペアを追跡するためのセット
+  vector<int> tour_opt = tour; //最適化されたツアーを一時的に保存するためのベクター
+  double g_opt = 0; //最適なツアーの長さ
+  double g = 0; // 現在のツアーの長さ
+  double g_local; // 局所的なツアーの長さ
+  int lastNextV = tourStart; // 前回つなげた都市
+  int fromV;// 現在の都市
+  int nextV;// 次に訪れる都市
   int nextFromV;
   int lastPossibleNextV;
   pair<int, int> broken_edge;
   double y_opt_length;
   double broken_edge_length;
   double g_opt_local;
-
+  // 現在の都市をtourStartの次として設定
   fromV = tour[lastNextV];
   long initialTourDistance = getCurrentTourDistance();
 
   do {
-    // default, no nextV is found
     nextV = -1;
 
-
-    broken_edge = make_sorted_pair(lastNextV, fromV); // := x_i
+    // 現在のエッジを一つ前から切り離す
+    broken_edge = make_sorted_pair(lastNextV, fromV);
     broken_edge_length = edgeDistances[broken_edge.first][broken_edge.second];
-
+    // 切り離すエッジがすでに結合セットに含まれている場合、ループを終了
     if (joined_set.count(broken_edge) > 0) break;
 
-    // y_i := (fromV, nextV)
+    // 現在の都市からつながっている都市を順番に見ていく
     for (int possibleNextV = tour[fromV]; nextV == -1 && possibleNextV != tourStart; possibleNextV = tour[possibleNextV]) {
-      // calculate local gain
+      //繋ぎ変えた結果得られる利得を計算(大きいほどよい)
       g_local = broken_edge_length - edgeDistances[fromV][possibleNextV];
-
+      // この都市をつなげるべきかどうかを判断
       if (!(
         broken_set.count(make_sorted_pair(fromV, possibleNextV)) == 0 &&
         g + g_local > 0 &&
-        // x_{i+1} has never been joined before
         joined_set.count(make_sorted_pair(lastPossibleNextV, possibleNextV)) == 0 &&
-        tour[possibleNextV] != 0 && // not already joined to start
-        possibleNextV != tour[fromV] // not the one already joined to fromV
+        tour[possibleNextV] != 0 && 
+        possibleNextV != tour[fromV] 
       )) {
+        // この都市をつなげるべきではない場合
         lastPossibleNextV = possibleNextV;
         continue;
       }
+      // この都市をつなげるべき場合
       nextV = possibleNextV;
     }
     
-    // a next y_i exists
     if (nextV != -1) {
+      // 現在のエッジを一つ前から切り離す
       broken_set.insert(broken_edge);
+      // 現在の都市と次の都市のエッジを結合する
       joined_set.insert(make_sorted_pair(fromV, nextV));
-
-      // condition 4(f)
-      y_opt_length = edgeDistances[fromV][tourStart]; // y_i_opt
-      
-      // The tour length if we exchanged the broken edge (x_i)
-      // with y_opt, (t_{2i}, t_0)
+      y_opt_length = edgeDistances[fromV][tourStart];
       g_opt_local = g + (broken_edge_length - y_opt_length);
-
+      // エッジの交換が現在の最適解を改善するかどうか
       if (g_opt_local > g_opt) {
         g_opt = g_opt_local;
         tour_opt = tour;
-        // join the optimal tour
         tour_opt[tourStart] = fromV;
       }
-      // recalculate g
       g += broken_edge_length - edgeDistances[fromV][nextV];
-
-      // reverse tour direction between newNextV and fromV
-      // implicitly breaks x_i
+      // 現在の都市から次の都市の手前までのツアーを反転
       reverse(fromV, lastPossibleNextV);
-
-      // remember our new t_{2i+1}
       nextFromV = lastPossibleNextV;
-      //cout << "Joined to " << nextFromV << endl;
-
-      // build y_i
       tour[fromV] = nextV;
-      
-      // set new fromV to t_{2i+1}
-      // and out lastNextV to t_{2i}
       lastNextV = nextV;
       fromV = nextFromV;
 
@@ -151,14 +159,10 @@ void LKSolver::LKMove(int tourStart) {
 
   } while (nextV != -1);
 
-
-  // join up
-  //cout << "terminated" << endl;
   tour = tour_opt;
   long distanceAfter = getCurrentTourDistance();
   assert(distanceAfter <= initialTourDistance);
 
-  // printTour();
   assert(isTour());
 
 }
@@ -166,9 +170,8 @@ void LKSolver::LKMove(int tourStart) {
 void LKSolver::optimizeTour() {
   // we need to test for convergence and also the difference from last time
   int diff;
-  int old_distance = 0;
-  int new_distance = 0;
-
+  double old_distance = getCurrentTourDistance();
+  double new_distance = 0;
   for (int j = 0; j < 100; j++) {
     for (int i = 0; i < size; i++) {
       LKMove(i);
